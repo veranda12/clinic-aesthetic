@@ -1,5 +1,17 @@
 import type { NavItem } from "@/types/content";
 
+// Tolerates an empty value or a missing protocol (e.g. "foo.vercel.app"), and
+// falls back to Vercel's auto-provided host, so `new URL(site.url)` never throws.
+function resolveSiteUrl(): string {
+  const raw =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() ||
+    process.env.VERCEL_URL?.trim() ||
+    "http://localhost:3000";
+  const withProtocol = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  return withProtocol.replace(/\/+$/, "");
+}
+
 export const site = {
   name: "AURELIA",
   fullName: "AURELIA Skin & Aesthetic",
@@ -8,7 +20,7 @@ export const site = {
   tagline: "Skin confidence, thoughtfully created.",
   description:
     "Aesthetic clinic di Jakarta Selatan yang merancang perawatan kulit berdasarkan kondisi dan kebutuhan kulit Anda — dari skin health hingga rejuvenation.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  url: resolveSiteUrl(),
   city: "Jakarta Selatan",
 } as const;
 
