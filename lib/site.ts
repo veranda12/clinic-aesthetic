@@ -49,5 +49,6 @@ export const adminNav: NavItem[] = [
   { label: "Reviews", href: "/admin/reviews" },
   { label: "FAQ", href: "/admin/faqs" },
   { label: "Certificates", href: "/admin/certificates" },
+  { label: "Hero", href: "/admin/hero" },
   { label: "Clinic Info", href: "/admin/clinic" },
 ];

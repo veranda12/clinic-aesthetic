@@ -34,7 +34,7 @@ export default async function HomePage() {
     ]);
 
   const heroImage =
-    settings.hero_image ??
+    settings.hero_image ||
     "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&q=80&w=2000";
   const heroHeading = settings.hero_heading ?? site.tagline;
   const heroSub = settings.hero_subcopy ?? site.description;
