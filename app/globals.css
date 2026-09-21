@@ -1,0 +1,359 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --shell-px: clamp(1.25rem, 5vw, 5.5rem);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-ivory text-ink font-sans antialiased;
+    font-feature-settings: "kern", "liga", "calt";
+  }
+
+  ::selection {
+    background: #2b2825;
+    color: #f5f0e8;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display text-ink;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Visible, on-brand focus ring for keyboard users. */
+  :focus-visible {
+    outline: 2px solid #5e6248;
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+@layer components {
+  .shell {
+    padding-left: var(--shell-px);
+    padding-right: var(--shell-px);
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1440px;
+    width: 100%;
+  }
+
+  .shell-wide {
+    padding-left: var(--shell-px);
+    padding-right: var(--shell-px);
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1560px;
+    width: 100%;
+  }
+
+  .eyebrow {
+    @apply font-sans text-eyebrow uppercase text-taupe;
+    font-weight: 600;
+  }
+
+  .hairline {
+    @apply border-0 border-t border-line;
+  }
+
+  /* Display heading scale — serif, restrained weight, fluid. */
+  .display-xl {
+    @apply font-display;
+    font-size: clamp(2.6rem, 6.5vw, 5.6rem);
+    line-height: 1.02;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .display-lg {
+    @apply font-display;
+    font-size: clamp(2.1rem, 4.6vw, 3.6rem);
+    line-height: 1.08;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+  }
+
+  .display-md {
+    @apply font-display;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    line-height: 1.15;
+    font-weight: 500;
+  }
+
+  .lead {
+    @apply text-ink-soft;
+    font-size: clamp(1.05rem, 1.4vw, 1.22rem);
+    line-height: 1.7;
+  }
+
+  .prose-body {
+    @apply text-ink-soft;
+    line-height: 1.8;
+  }
+
+  .prose-body p + p {
+    margin-top: 1.15em;
+  }
+
+  /* Buttons — square-ish, letterspaced label, no pill radius. */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-sans;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.95rem 1.8rem;
+    border-radius: 2px;
+    transition: background-color 0.4s var(--tw-ease, cubic-bezier(0.22, 1, 0.36, 1)),
+      color 0.4s ease, border-color 0.4s ease, transform 0.4s ease;
+  }
+
+  .btn-primary {
+    @apply btn bg-ink text-ivory;
+  }
+
+  .btn-primary:hover {
+    @apply bg-olive-deep;
+  }
+
+  .btn-outline {
+    @apply btn border border-ink text-ink bg-transparent;
+  }
+
+  .btn-outline:hover {
+    @apply bg-ink text-ivory;
+  }
+
+  .btn-ghost {
+    @apply btn border border-line text-ink bg-transparent;
+  }
+
+  .btn-ghost:hover {
+    @apply border-ink;
+  }
+
+  /* Understated animated underline link. */
+  .link-underline {
+    position: relative;
+    display: inline-block;
+    padding-bottom: 2px;
+  }
+
+  .link-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 1px;
+    width: 100%;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .link-underline:hover::after {
+    transform: scaleX(1);
+  }
+
+  /* Editorial image frame — container only. Motion is applied per context on
+     the image element itself (treatments, doctors, journal, hero, gallery each
+     get a distinct interaction), never one shared hover effect. */
+  .img-frame {
+    position: relative;
+    overflow: hidden;
+    background: #ece3d6;
+  }
+
+  /* ── Context-specific image interactions ─────────────────────────────
+     Each opts in via a wrapper marked `.group`. Movements are small; the
+     timing/composition does the work. All use transform/opacity/filter only. */
+
+  .media {
+    will-change: transform;
+    transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1),
+      filter 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Treatment — reframe closer with a clear upward crop drift (vertical). */
+  .media-treatment {
+    transform-origin: center 62%;
+    transition: transform 850ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .group:hover .media-treatment {
+    transform: scale(1.05) translateY(-2.4%);
+  }
+
+  /* Doctor portrait — barely scales; the tell is a soft lift in light, like a
+     studio portrait warming up. No directional drift. */
+  .media-doctor {
+    transition: transform 1100ms cubic-bezier(0.22, 1, 0.36, 1),
+      filter 1100ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .group:hover .media-doctor {
+    transform: scale(1.028);
+    filter: brightness(1.07) contrast(1.02);
+  }
+
+  /* Journal — a horizontal reframe (pan), distinct from a zoom. */
+  .media-journal {
+    transform-origin: left center;
+    transition: transform 1000ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .group:hover .media-journal {
+    transform: scale(1.03) translateX(3.5%);
+  }
+
+  /* Gallery — the most overt: a slow, generous zoom with a lift in brightness. */
+  .media-gallery {
+    transition: transform 1200ms cubic-bezier(0.22, 1, 0.36, 1),
+      filter 1200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .group:hover .media-gallery {
+    transform: scale(1.075);
+    filter: brightness(1.05);
+  }
+
+  /* Hero / featured — a one-time cinematic settle on load, not a hover zoom. */
+  .media-cinematic {
+    animation: media-settle 1600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes media-settle {
+    from {
+      transform: scale(1.06);
+      filter: brightness(1.04);
+    }
+    to {
+      transform: scale(1);
+      filter: brightness(1);
+    }
+  }
+
+  /* Featured card — restrained centred scale, no drift (home signature grid). */
+  .media-featured {
+    transition: transform 1000ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .group:hover .media-featured {
+    transform: scale(1.045);
+  }
+
+  /* Underline that reveals from the left when its `group` is hovered. */
+  .reveal-underline {
+    position: relative;
+    display: inline-block;
+  }
+  .reveal-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    height: 1px;
+    width: 100%;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .group:hover .reveal-underline::after {
+    transform: scaleX(1);
+  }
+
+  .field-label {
+    @apply block text-eyebrow uppercase text-taupe mb-2;
+    font-weight: 600;
+  }
+
+  .field-input {
+    @apply w-full bg-paper border border-line text-ink px-4 py-3 text-[0.95rem];
+    border-radius: 2px;
+    transition: border-color 0.3s ease;
+  }
+
+  .field-input:focus {
+    @apply border-olive outline-none;
+    outline: none;
+  }
+
+  .field-input::placeholder {
+    @apply text-taupe-light;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Scroll reveal — hidden until observed, then eased into place. */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Respect users who prefer reduced motion — the design must hold up static. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Turn off image movement entirely — keep the composition, drop the motion. */
+  .group:hover .media-treatment,
+  .group:hover .media-doctor,
+  .group:hover .media-journal,
+  .group:hover .media-gallery,
+  .group:hover .media-featured {
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .media-cinematic {
+    animation: none !important;
+  }
+
+  .group:hover .reveal-underline::after {
+    transform: scaleX(1);
+  }
+}

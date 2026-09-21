@@ -1,0 +1,271 @@
+// AURELIA Skin & Aesthetic — Prisma schema
+// PostgreSQL. Content for the public site is sourced from these tables and
+// managed through the /admin CMS.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Runtime connection. On Supabase/Vercel this is the pooled (PgBouncer, 6543)
+  // connection string; locally it's your direct Postgres URL.
+  url      = env("DATABASE_URL")
+  // Used by `prisma migrate` — must be a direct (non-pooled) connection.
+  // Locally, set it to the same value as DATABASE_URL.
+  directUrl = env("DIRECT_URL")
+}
+
+// --- Authentication -------------------------------------------------------
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// --- Treatments -----------------------------------------------------------
+
+model TreatmentCategory {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  name        String
+  // Editorial grouping label shown on /treatments (e.g. "Skin", "Advanced").
+  tagline     String?
+  description String?
+  order       Int         @default(0)
+  treatments  Treatment[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+model Treatment {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  name        String
+  // One-line editorial summary used on listing rows.
+  summary     String
+  // Full rich description (plain text / light markdown paragraphs).
+  description String            @db.Text
+  howItWorks  String?           @db.Text
+  whoFor      String?           @db.Text
+  aftercare   String?           @db.Text
+  expected    String?           @db.Text
+  // Skin concerns this treatment addresses.
+  concerns    String[]
+  // Ordered process steps: [{ title, description }]
+  process     Json?
+  duration    String?
+  frequency   String?
+  priceFrom   Int?
+  imageUrl    String
+  imageAlt    String?
+  // Additional gallery images (process, results, room).
+  gallery     String[]          @default([])
+  featured    Boolean           @default(false)
+  published   Boolean           @default(true)
+  order       Int               @default(0)
+
+  categoryId  String
+  category    TreatmentCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  faqs        Faq[]
+  testimonials Testimonial[]
+
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([categoryId])
+}
+
+// --- Doctors --------------------------------------------------------------
+
+model Doctor {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  name           String
+  title          String
+  education      String?
+  specialization String?
+  bio            String   @db.Text
+  imageUrl       String
+  imageAlt       String?
+  order          Int      @default(0)
+  published      Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  articles       Article[]
+}
+
+// --- Journal / Articles ---------------------------------------------------
+
+model ArticleCategory {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  name      String
+  order     Int       @default(0)
+  articles  Article[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Article {
+  id          String           @id @default(cuid())
+  slug        String           @unique
+  title       String
+  excerpt     String
+  // Body stored as markdown-ish paragraphs separated by blank lines.
+  body        String           @db.Text
+  imageUrl    String
+  imageAlt    String?
+  readMinutes Int              @default(4)
+  published   Boolean          @default(false)
+  publishedAt DateTime?
+
+  categoryId  String?
+  category    ArticleCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  authorId    String?
+  author      Doctor?          @relation(fields: [authorId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([categoryId])
+  @@index([authorId])
+}
+
+// --- Clinic information ----------------------------------------------------
+
+model ClinicLocation {
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  city        String
+  phone       String?
+  whatsapp    String?
+  email       String?
+  instagram   String?
+  mapEmbedUrl String?  @db.Text
+  // Opening hours: [{ day, hours }]
+  hours       Json?
+  isPrimary   Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Testimonial {
+  id          String     @id @default(cuid())
+  author      String
+  // Contextual label, e.g. "Acne Treatment · 6 sesi".
+  context     String?
+  quote       String     @db.Text
+  rating      Int        @default(5)
+  published   Boolean    @default(true)
+  order       Int        @default(0)
+
+  treatmentId String?
+  treatment   Treatment? @relation(fields: [treatmentId], references: [id], onDelete: SetNull)
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([treatmentId])
+}
+
+model Faq {
+  id          String     @id @default(cuid())
+  question    String
+  answer      String     @db.Text
+  // Grouping bucket for general FAQs on the contact/about pages.
+  group       String     @default("general")
+  order       Int        @default(0)
+  published   Boolean    @default(true)
+
+  treatmentId String?
+  treatment   Treatment? @relation(fields: [treatmentId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([treatmentId])
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// --- Certificates / credentials -------------------------------------------
+
+model Certificate {
+  id          String   @id @default(cuid())
+  title       String
+  issuer      String
+  // Grouping bucket, e.g. "Perizinan", "Akreditasi", "Sertifikasi", "Penghargaan".
+  category    String   @default("Sertifikasi")
+  year        String?
+  description String?  @db.Text
+  imageUrl    String
+  imageAlt    String?
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+}
+
+// --- Customer reviews -----------------------------------------------------
+
+// Public, customer-submitted reviews with a star rating. New submissions are
+// held for moderation (`approved = false`) before appearing on the site.
+model Review {
+  id          String   @id @default(cuid())
+  author      String
+  // Optional context — treatment name the review is about.
+  treatment   String?
+  rating      Int      @default(5)
+  body        String   @db.Text
+  approved    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([approved])
+}
+
+// --- Facilities -----------------------------------------------------------
+
+model Facility {
+  id          String   @id @default(cuid())
+  name        String
+  category    String?
+  description String?  @db.Text
+  imageUrl    String
+  imageAlt    String?
+  // Additional photos of the same space (angles, details).
+  gallery     String[] @default([])
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// A lightweight media reference library. Images are stored as URLs (remote or
+// /public) so the site works without an upload pipeline for the demo.
+model Media {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String?
+  caption   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
