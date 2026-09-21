@@ -1,7 +1,7 @@
+
+import "dotenv/config";
 import { getSupabaseAdmin, STORAGE_BUCKET } from "@/lib/supabase";
 
-// Creates the public Storage bucket used for image uploads. Idempotent.
-// Run once after configuring Supabase env vars: `npm run setup:storage`.
 async function main() {
   const supabase = getSupabaseAdmin();
   if (!supabase) {
